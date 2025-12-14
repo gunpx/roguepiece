@@ -1,6 +1,6 @@
 --// ⚔️ AutoFarm Anos + AutoZoom + AutoHaki + AutoSkill ⚔️ --// by กัน (Edit: Shadow → Anos)
 
---===[ Settings ]===-- local ISLAND = "Abyss Hill [Upper]" local Weapon = "Anos" -- เปลี่ยนอาวุธตามชื่อจริงในกระเป๋า local Delay = 0.3
+--===[ Settings ]===-- local ISLAND = "Abyss Hill [Upper]" local Weapon = "Shadow" -- เปลี่ยนอาวุธตามชื่อจริงในกระเป๋า local Delay = 0.3
 
 -- Quest NPC CFrame (Sorcerer's Teacher) local SCHOOL = "Jujutsu Highschool" local TEACHER_QUEST_CFRAME = CFrame.new( 1045.44641, 4.001659134, -135.367126, -0.958416879, 7.04e-08, 0.28537181, -8.65e-08, 1, -4.38e-08, -0.28537181, -6.67e-08, -0.958416879 )
 
