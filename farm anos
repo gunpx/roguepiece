@@ -1,29 +1,182 @@
---// ⚔️ AutoFarm Anos + AutoZoom + AutoHaki + AutoSkill ⚔️ --// by กัน (Edit: Shadow → Anos)
+--// ⚔️ AutoFarm Anos + Sorcerer's Teacher + AutoZoom + AutoHaki + AutoSkill ⚔️
+--// by กัน
 
---===[ Settings ]===-- local ISLAND = "Abyss Hill [Upper]" local Weapon = "Shadow" -- เปลี่ยนอาวุธตามชื่อจริงในกระเป๋า local Delay = 0.3
+--===[ Settings ]===--
+local ISLAND = "Abyss Hill [Upper]"
+local SCHOOL = "Jujutsu Highschool"
+local Weapon = "Anos"
+local Delay = 0.3
 
--- Quest NPC CFrame (Sorcerer's Teacher) local SCHOOL = "Jujutsu Highschool" local TEACHER_QUEST_CFRAME = CFrame.new( 1045.44641, 4.001659134, -135.367126, -0.958416879, 7.04e-08, 0.28537181, -8.65e-08, 1, -4.38e-08, -0.28537181, -6.67e-08, -0.958416879 )
+--===[ Services ]===--
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
---===[ Services ]===-- local Players = game:GetService("Players") local ReplicatedStorage = game:GetService("ReplicatedStorage") local RunService = game:GetService("RunService") local VirtualInputManager = game:GetService("VirtualInputManager") local player = Players.LocalPlayer local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Serverside") local camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
+local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Serverside")
+local camera = workspace.CurrentCamera
 
---===[ Global States ]===-- getgenv().AutoZoom = false getgenv().Anos = false getgenv().AutoSkill = true
+--===[ States ]===--
+getgenv().AutoZoom = false
+getgenv().Anos = false
+getgenv().AutoSkill = true
 
-local SkillKeys = { Z = Enum.KeyCode.Z, X = Enum.KeyCode.X, C = Enum.KeyCode.C, V = Enum.KeyCode.V } local UseSkills = {"Z","X","C","V"}
+--===[ Skill Setup ]===--
+local SkillKeys = {
+	Z = Enum.KeyCode.Z,
+	X = Enum.KeyCode.X,
+	C = Enum.KeyCode.C,
+	V = Enum.KeyCode.V
+}
+local UseSkills = {"Z","X","C","V"}
 
---===[ UI ]===-- local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui")) gui.Name = "AnosFarmUI" gui.ResetOnSpawn = false
+--===[ UI ]===--
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "AutoFarmUI"
+gui.ResetOnSpawn = false
 
-local frame = Instance.new("Frame", gui) frame.Size = UDim2.new(0, 220, 0, 105) frame.Position = UDim2.new(0.8, 0, 0.55, 0) frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) frame.BorderSizePixel = 0 frame.BackgroundTransparency = 0.1 frame.Active = true frame.Draggable = true
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,220,0,105)
+frame.Position = UDim2.new(0.8,0,0.55,0)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.Active = true
+frame.Draggable = true
 
-local function makeButton(name, order) local btn = Instance.new("TextButton", frame) btn.Size = UDim2.new(1, -20, 0, 40) btn.Position = UDim2.new(0, 10, 0, (order - 1) * 45 + 10) btn.Text = name btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70) btn.TextColor3 = Color3.new(1, 1, 1) btn.Font = Enum.Font.GothamBold btn.TextSize = 16 btn.BorderSizePixel = 0 return btn end
+local function makeButton(text, order)
+	local b = Instance.new("TextButton", frame)
+	b.Size = UDim2.new(1,-20,0,40)
+	b.Position = UDim2.new(0,10,0,(order-1)*45+10)
+	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 16
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = Color3.fromRGB(70,70,70)
+	b.BorderSizePixel = 0
+	return b
+end
 
-local zoomBtn = makeButton("Auto Zoom ❌", 1) local anosBtn = makeButton("Auto Anos ❌", 2)
+local zoomBtn = makeButton("Auto Zoom ❌",1)
+local farmBtn = makeButton("Auto Farm ❌",2)
 
---===[ ProximityPrompt Instant ]===-- for _, obj in pairs(workspace:GetDescendants()) do if obj:IsA("ProximityPrompt") then obj.HoldDuration = 0 end end workspace.DescendantAdded:Connect(function(obj) if obj:IsA("ProximityPrompt") then obj.HoldDuration = 0 end end)
+--===[ Auto Haki + Observation (Infinity) ]===--
+task.spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			Remotes:FireServer("Server","Misc","Haki",1)
+			Remotes:FireServer("Server","Misc","Observation",1)
+		end)
+	end
+end)
 
---===[ Auto Haki + Observation (Infinity) ]===-- --===[ Auto Loop : Priority Anos > Sorcerer's Teacher ]===-- task.spawn(function() while task.wait(0.3) do if getgenv().Anos then -- 1️⃣ ถ้า Anos เกิด ตีก่อน local anos = findAnos() if anos then attack(anos) else -- 2️⃣ ฟาร์ม Sorcerer's Teacher (Quest) local teacher = findTeacher() if teacher then attack(teacher) else -- ไม่มีวาร์ปไปรับเควส (รอ Teacher เกิดอย่างเดียว) end end end end end)
+--===[ Helpers ]===--
+local function waitChar()
+	local c,hrp
+	repeat
+		c = player.Character or player.CharacterAdded:Wait()
+		hrp = c:FindFirstChild("HumanoidRootPart")
+		task.wait()
+	until hrp
+	return c,hrp
+end
 
---===[ Auto Zoom ]===-- RunService.RenderStepped:Connect(function() local char = player.Character if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") then if getgenv().AutoZoom then camera.CameraType = Enum.CameraType.Scriptable local camPos = char.HumanoidRootPart.Position + Vector3.new(0,50,0) camera.CFrame = CFrame.new(camPos, char.Head.Position) else camera.CameraType = Enum.CameraType.Custom camera.CameraSubject = char:FindFirstChildOfClass("Humanoid") end end end)
+local function equip()
+	if player.Backpack:FindFirstChild(Weapon) then
+		player.Character.Humanoid:EquipTool(player.Backpack[Weapon])
+	end
+end
 
---===[ Buttons ]===-- zoomBtn.MouseButton1Click:Connect(function() getgenv().AutoZoom = not getgenv().AutoZoom zoomBtn.Text = "Auto Zoom " .. (getgenv().AutoZoom and "✅" or "❌") zoomBtn.BackgroundColor3 = getgenv().AutoZoom and Color3.fromRGB(0,150,0) or Color3.fromRGB(70,70,70) end)
+local function press(key)
+	VirtualInputManager:SendKeyEvent(true,key,false,game)
+	task.wait(0.1)
+	VirtualInputManager:SendKeyEvent(false,key,false,game)
+end
 
-anosBtn.MouseButton1Click:Connect(function() getgenv().Anos = not getgenv().Anos anosBtn.Text = "Auto Anos " .. (getgenv().Anos and "✅" or "❌") anosBtn.BackgroundColor3 = getgenv().Anos and Color3.fromRGB(0,150,0) or Color3.fromRGB(70,70,70) end)
+--===[ Find Targets ]===--
+local function findAnos()
+	local f = workspace.Main.Characters[ISLAND]:FindFirstChild("Boss")
+	if not f then return end
+	for _,v in pairs(f:GetChildren()) do
+		if v.Name=="Anos" and v:FindFirstChild("HumanoidRootPart")
+		and v.Humanoid.Health>0 then
+			return v
+		end
+	end
+end
+
+local function findTeacher()
+	local f = workspace.Main.Characters[SCHOOL]:FindFirstChild("Sorcerer's Teacher")
+	if not f then return end
+	for _,v in pairs(f:GetChildren()) do
+		if v.Name=="Sorcerer's Teacher"
+		and v:FindFirstChild("HumanoidRootPart")
+		and v.Humanoid.Health>0 then
+			return v
+		end
+	end
+end
+
+--===[ Attack ]===--
+local function attack(mob)
+	local _,hrp = waitChar()
+	hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
+	equip()
+
+	if getgenv().AutoSkill then
+		for _,k in ipairs(UseSkills) do
+			press(SkillKeys[k])
+			task.wait(0.25)
+		end
+	end
+
+	for i=1,12 do
+		Remotes:FireServer("Server","Sword","M1s",Weapon,1)
+		task.wait(0.1)
+	end
+end
+
+--===[ Main Loop : Anos > Teacher ]===--
+task.spawn(function()
+	while task.wait(Delay) do
+		if getgenv().Anos then
+			local anos = findAnos()
+			if anos then
+				attack(anos)
+			else
+				local teacher = findTeacher()
+				if teacher then
+					attack(teacher)
+				end
+				-- ❌ ไม่มีวาร์ปรับเควส
+			end
+		end
+	end
+end)
+
+--===[ Auto Zoom ]===--
+RunService.RenderStepped:Connect(function()
+	local c = player.Character
+	if not c or not c:FindFirstChild("HumanoidRootPart") then return end
+
+	if getgenv().AutoZoom then
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = CFrame.new(
+			c.HumanoidRootPart.Position + Vector3.new(0,50,0),
+			c.Head.Position
+		)
+	else
+		camera.CameraType = Enum.CameraType.Custom
+		camera.CameraSubject = c.Humanoid
+	end
+end)
+
+--===[ Buttons ]===--
+zoomBtn.MouseButton1Click:Connect(function()
+	getgenv().AutoZoom = not getgenv().AutoZoom
+	zoomBtn.Text = "Auto Zoom "..(getgenv().AutoZoom and "✅" or "❌")
+end)
+
+farmBtn.MouseButton1Click:Connect(function()
+	getgenv().Anos = not getgenv().Anos
+	farmBtn.Text = "Auto Farm "..(getgenv().Anos and "✅" or "❌")
+end)
