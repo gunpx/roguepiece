@@ -4,7 +4,7 @@
 --===[ Settings ]===--
 local ISLAND = "Abyss Hill [Upper]"
 local SCHOOL = "Jujutsu Highschool"
-local Weapon = "Anos"
+local Weapon = "Shadow"
 local Delay = 0.3
 
 --===[ Services ]===--
